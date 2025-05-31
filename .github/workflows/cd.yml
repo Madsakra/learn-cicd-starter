@@ -8,7 +8,6 @@ on:
 jobs:
   Deploy:
     runs-on: ubuntu-latest
-
     # Grant necessary permissions for Workload Identity Federation
     permissions:
       contents: 'read'
@@ -27,11 +26,11 @@ jobs:
         run: ./scripts/buildprod.sh
 
 
-      # Authenticate with Google Cloud using Workload Identity Federation
-    - id: 'auth'
-      uses: 'google-github-actions/auth@v2'
-      with:
-        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      # Authenticate with Google Cloud using service account key
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       # Set up the gcloud CLI
       - name: 'Set up Cloud SDK'
