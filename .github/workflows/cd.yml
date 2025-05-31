@@ -9,6 +9,11 @@ jobs:
   Deploy:
     runs-on: ubuntu-latest
 
+    # Grant necessary permissions for Workload Identity Federation
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -20,3 +25,24 @@ jobs:
     
       - name: Build production app
         run: ./scripts/buildprod.sh
+
+
+      # Authenticate with Google Cloud using Workload Identity Federation
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      # Set up the gcloud CLI
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      # Optional: verify gcloud is working
+      - name: 'Verify gcloud setup'
+        run: 'gcloud info'
+
+      # submit build
+      - name: Submit build to Google Cloud Build
+        run: 'gcloud builds submit --tag us-central1-docker.pkg.dev/notely-461407/notely-ar-repo/notely:latest .'
