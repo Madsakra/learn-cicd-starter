@@ -46,8 +46,8 @@ jobs:
         run: ./scripts/buildprod.sh
         # DATABASE ENV
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          
+          DATABASE_URL: '${{ secrets.DATABASE_URL }}'
+
       # DATABASE MIGRATION UP
       - name: Databse Migration 
         run: ./scripts/migrateup.sh
