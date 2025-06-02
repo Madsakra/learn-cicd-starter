@@ -11,7 +11,9 @@ jobs:
     # Grant necessary permissions for Workload Identity Federation
 
 
-
+    # DATABASE ENV
+    env:
+       DATABASE_URL: '${{ secrets.DATABASE_URL }}'
 
 
 
@@ -44,9 +46,7 @@ jobs:
 
       - name: Build production app
         run: ./scripts/buildprod.sh
-        # DATABASE ENV
-        env:
-          DATABASE_URL: '${{ secrets.DATABASE_URL }}'
+
 
       # DATABASE MIGRATION UP
       - name: Databse Migration 
