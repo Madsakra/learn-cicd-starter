@@ -9,6 +9,14 @@ jobs:
   Deploy:
     runs-on: ubuntu-latest
     # Grant necessary permissions for Workload Identity Federation
+
+
+    # DATABASE ENV
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+
+
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -17,14 +25,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # ✅ NEW: Install goose (Go migration tool)
+      - name: Install Goose
+        run: go install github.com/pressly/goose/v3/cmd/goose@latest
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
     
+      # ✅ NEW: Run git diff to catch accidental credentials
+      - name: Check for sensitive data with git diff
+        run: |
+          echo "Checking for leaked credentials in diff..."
+          git diff HEAD | grep -Ei 'password|secret|token|apikey|database_url' && echo "⚠️ Potential secrets found!" || echo "✅ No secrets detected."
+
+
+
       - name: Build production app
         run: ./scripts/buildprod.sh
 
+      # DATABASE MIGRATION UP
+      - name: Databse Migration 
+        run: ./scripts/migrateup.sh
 
       # Authenticate with Google Cloud using service account key
       - id: 'auth'
@@ -49,3 +72,4 @@ jobs:
       # deploy to cloud run
       - name: Deploy to Cloud Run
         run: gcloud run deploy notely --image us-central1-docker.pkg.dev/notely-461407/notely-ar-repo/notely:latest --region us-central1 --allow-unauthenticated --project notely-461407 --max-instances=4
+
